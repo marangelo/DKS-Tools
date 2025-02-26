@@ -1,0 +1,10 @@
+services:
+  metube:
+    image: ghcr.io/alexta69/metube:2025-02-20
+    container_name: cn_metube
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./Downloads:/downloads
+  

@@ -1,0 +1,7 @@
+services:
+  unlighthouse:
+    image: epicsoft/unlighthouse:latest
+    container_name: unlighthouse
+    command: "unlighthouse --site='https://marangelo.com' --dekstop"
+    ports:
+      - 5678:5678
