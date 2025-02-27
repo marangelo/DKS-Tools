@@ -1,0 +1,63 @@
+services:
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:2.11.1'
+    container_name: cn_nginx-proxy-manage 
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    environment:
+      DB_MYSQL_HOST: mysql_server
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "root"
+      DB_MYSQL_PASSWORD: ${PZW_ROOT}
+      DB_MYSQL_NAME: "npm"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt    
+  mysql_server:
+    container_name: "cn_mysql_server"
+    image: mysql:5.7    
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: ${PZW_ROOT}
+      MYSQL_PORT: ${Credi_PORT}
+      MYSQL_USER: ${MYSQL_USER_NPM}
+      MYSQL_PASSWORD: ${MYSQL_PASS_NPM}
+      MYSQL_LOWER_CASE_TABLE_NAMES: 0
+    restart: always
+    ports:
+      - 4406:3306
+  mysql-backup:
+    container_name : cn_mysql_backup
+    image: fradelg/mysql-cron-backup:1.13.1
+    volumes:
+      - ./BackUp:/backup
+    environment:
+      - MYSQL_HOST=mysql_server
+      - MYSQL_USER=${MYSQL_USER_NPM}
+      - MYSQL_PASS=${MYSQL_PASS_NPM}
+      - MAX_BACKUPS=15
+      - INIT_BACKUP=0
+      - CRON_TIME=0 23 * * *
+      - TZ=America/Managua
+      - GZIP_LEVEL=9
+    restart: unless-stopped
+  rclone-gdrive:
+    container_name: cn_rclone-npm
+    image: pfidr/rclone:1.63.0  
+    restart: unless-stopped
+    volumes:
+      - ./rclone:/config
+      - ./BackUp:/gdrive
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - "RCLONE_CMD=sync"
+      - "TZ=America/Managua"
+      - "SYNC_SRC=/gdrive"
+      - "SYNC_DEST=gdrive:/BackUp"
+      - "CRON=20 23 * * *"
+      - "FORCE_SYNC=1"
+      - "SYNC_OPTS=-v"
+      - "CHECK_URL=https://hc-ping.com/f927de2e-995f-4296-bd83-e2ffd8274a59"
