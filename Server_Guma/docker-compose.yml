@@ -1,0 +1,132 @@
+services:
+
+  redis_server:
+    image: redis:6.2-alpine
+    container_name: cn_redis_server
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --loglevel warning --requirepass ${PZW_ROOT}
+    volumes:
+    - ./redis-data:/data 
+  mysql_master:
+    image: mysql:5.7
+    container_name: cn_mysql_master
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: ${PZW_ROOT}
+      MYSQL_PORT: ${myPORT}
+      MYSQL_USER: ${MYSQL_USER_MST}
+      MYSQL_PASSWORD: ${MYSQL_PASS_MST}
+      MYSQL_LOWER_CASE_TABLE_NAMES: 0
+    restart: always
+    ports:
+      - 4406:3306
+    volumes:
+      - ./mysql_conf/master/conf/mysql.conf.cnf:/etc/mysql/conf.d/mysql.conf.cnf
+      - ./mysql_conf/master/data:/var/lib/mysql
+      - ./mmysql_conf/master/logs:/var/log/mysql
+      #- ./initdb/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 30s
+
+  mysql_slave:
+    image: mysql:5.7
+    container_name: "mysql_slave"
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: ${PZW_ROOT}
+      MYSQL_PORT: ${myPORT}
+      MYSQL_USER: ${MYSQL_USER_SLV}
+      MYSQL_PASSWORD: ${MYSQL_PASS_SLV}
+      MYSQL_LOWER_CASE_TABLE_NAMES: 0
+    restart: always
+    ports:
+      - 5506:3306
+    depends_on:
+      mysql_master:
+        condition: service_healthy
+    volumes:
+      - ./mysql_conf/slave/conf/mysql.conf.cnf:/etc/mysql/conf.d/mysql.conf.cnf
+      - ./mysql_conf/slave/data:/var/lib/mysql
+      - ./mysql_conf/slave/logs:/var/log/mysql
+      #- ./initdb/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 30s
+
+  mysql-cron-backup:
+    container_name : cn_mysql-cron-backup
+    image: gumadesarrollo/docker-mysql-cron-backup:v1.0.0
+    depends_on:
+      - mysql_master
+    volumes:
+      - ./BackUp/Master:/backup
+    environment:
+      - MYSQL_HOST=mysql_master
+      - MYSQL_USER= root
+      - MYSQL_PASS=${PZW_ROOT}
+      - MAX_BACKUPS=15
+      - INIT_BACKUP=0
+      - CRON_TIME=0 23 * * *
+      - TZ=America/Managua
+      - GZIP_LEVEL=9
+    restart: always
+  
+  web-app-gnet:
+    container_name: cn_app_gnet
+    image: kooldev/php:7.4-nginx-sqlsrv-prod
+    restart: always
+    volumes:
+      - "./www/gumanet:/app/gumanet"
+      - "./conf/default.tmpl:/kool/default.tmpl"
+    ports:
+      - "81:80"
+    environment:
+      - APP_NAME=gumanet
+      - PHP_FPM_LISTEN=/run/php-fpm.sock
+      - NGINX_LISTEN=80
+      - NGINX_ROOT=/app/gumanet/public
+      - NGINX_INDEX=index.php
+      - NGINX_CLIENT_MAX_BODY_SIZE=25M
+      - NGINX_PHP_FPM=unix:/run/php-fpm.sock
+      - NGINX_FASTCGI_READ_TIMEOUT=60s
+      - NGINX_FASTCGI_BUFFERS=8 8k
+      - NGINX_FASTCGI_BUFFER_SIZE=16k
+
+  app_sac:
+    container_name: cn_app-sac
+    image: kooldev/php:7.4-nginx-sqlsrv-prod
+    restart: always
+    volumes:
+      - "./www/SAC:/app/SAC"
+      - "./conf/default.tmpl:/kool/default.tmpl"
+    ports:
+      - "82:80"
+    environment:
+      - APP_NAME=SAC
+      - PHP_FPM_LISTEN=/run/php-fpm.sock
+      - NGINX_LISTEN=80
+      - NGINX_ROOT=/app/SAC/public
+      - NGINX_INDEX=index.php
+      - NGINX_CLIENT_MAX_BODY_SIZE=25M
+      - NGINX_PHP_FPM=unix:/run/php-fpm.sock
+      - NGINX_FASTCGI_READ_TIMEOUT=60s
+      - NGINX_FASTCGI_BUFFERS=8 8k
+      - NGINX_FASTCGI_BUFFER_SIZE=16k
+  
+  web-server:
+    container_name: cn_php7.4-apache-sqlsrv
+    image: gumadesarrollo/php:7.4-apache-sqlsrv-prod 
+    restart: always
+    volumes:
+      - "./www:/var/www/html"
+    ports:
+      - "83:80"
