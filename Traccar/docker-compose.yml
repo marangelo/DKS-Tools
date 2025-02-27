@@ -1,0 +1,15 @@
+services:
+  traccar:
+    image: traccar/traccar:latest
+    container_name: cn_traccar
+    hostname: traccar
+    restart: unless-stopped
+    environment:
+      TZ: "America/Managua"
+    ports:
+      - "80:8082"
+      - "5000-5150:5000-5150"
+      - "5000-5150:5000-5150/udp"
+    volumes:
+      - ./logs:/opt/traccar/logs:rw
+      - ./traccar.xml:/opt/traccar/conf/traccar.xml:ro
