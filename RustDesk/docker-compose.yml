@@ -1,0 +1,37 @@
+networks:
+  rustdesk-net:
+    external: false
+
+services:
+  hbbs:
+    container_name: cn_rustdesk-id
+    ports:
+      - 21115:21115
+      - 21116:21116
+      - 21116:21116/udp
+      - 21118:21118
+    image: rustdesk/rustdesk-server:latest
+    command: hbbs -r 186.1.15.171:21117
+    #command: hbbs
+    volumes:
+      - ./hbbs:/root
+    #network_mode: "host"
+    networks:
+      - rustdesk-net
+    depends_on:
+      - hbbr
+    restart: unless-stopped
+
+  hbbr:
+    container_name: cn_rustdesk-relay
+    ports:
+      - 21117:21117
+      - 21119:21119
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr
+    volumes:
+      - ./hbbr:/root
+    #network_mode: "host"
+    networks:
+      - rustdesk-net
+    restart: unless-stopped

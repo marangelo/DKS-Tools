@@ -1,0 +1,29 @@
+services:
+  terraria:
+    image: ghcr.io/beardedio/terraria:latest
+    container_name: terraria
+    ports:
+      - "7777:7777"
+    environment:
+      - world=world_terraria.wld
+    volumes:
+      - ${HOME}/terraria/config:/config
+    restart: unless-stopped
+  rclone-gdrive:
+    image: pfidr/rclone
+    container_name: cn_rclone_terraria
+    restart: unless-stopped
+    volumes:
+      - ./rclone:/config
+      - ${HOME}/terraria:/gdrive
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - "RCLONE_CMD=sync"
+      - "TZ=America/Managua"
+      - "SYNC_SRC=/gdrive"
+      - "SYNC_DEST=gdrive:/Software/BackUps/Terraria_master"
+      - "CRON=20 23 * * *"
+      - "FORCE_SYNC=1"
+      - "SYNC_OPTS=-v"
+      - "CHECK_URL=https://hc-ping.com/f927de2e-995f-4296-bd83-e2ffd8274a59"

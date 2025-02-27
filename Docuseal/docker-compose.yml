@@ -1,0 +1,26 @@
+services:
+  app:
+    container_name: cn_docuseal
+    #image: docuseal/docuseal:1.7.8
+    image: docuseal/docuseal:1.8.7
+    #ports:
+    #  - 8087:3000
+    volumes:
+      - ./docuseal:/data/docuseal
+    environment:
+      - FORCE_SSL=elDominio.com
+      #- DATABASE_URL=postgresql://postgres:postgres@postgres:5432/docuseal
+      - DATABASE_URL=mysql://root:password@192.168.xx.xx:xxxx/db_docuseal
+
+  caddy:
+    container_name: cn_caddy
+    image: caddy:latest
+    command: caddy reverse-proxy --from eldominio.com  --to app:3000
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - .:/data
+    environment:
+      - HOST=eldominio.com

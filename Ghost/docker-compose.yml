@@ -1,0 +1,36 @@
+services:
+  ghost:
+    container_name: cn_ghost
+    image: ghost:5-alpine
+    restart: always
+    ports:
+      - 8081:2368
+    environment:
+      # see https://ghost.org/docs/config/#configuration-options
+      database__client: mysql
+      database__connection__host: 192.168.x.xx
+      database__connection__port: 3307
+      database__connection__user: root
+      database__connection__password: <cambiame>
+      database__connection__database: db_ghost
+      # this url value is just an example, and is likely wrong for your environment!
+      url: https://blog.dominio.com
+      # contrary to the default mentioned in the linked documentation, this image defaults to NODE_ENV=production (so development mode needs to be explicitly specified if desired)
+      NODE_ENV: development
+    volumes:
+      - ./ghost:/var/lib/ghost/content
+  db:
+    container_name: cn_ghost_db
+    image: mysql:8.0
+    command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: db_ghost
+      #MYSQL_USER: usr_ghost
+      #MYSQL_PASSWORD: <cambiame>
+      MYSQL_ROOT_PASSWORD: <cambiame>
+    volumes:
+      - ./db:/var/lib/mysql

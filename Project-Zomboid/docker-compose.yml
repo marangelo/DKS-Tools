@@ -1,0 +1,43 @@
+services:
+    rclone-pz:
+      image: pfidr/rclone
+      container_name: cn_cron-rclone-pz
+      restart: unless-stopped
+      volumes:
+        - ./rclone:/config
+        - ./server-data:/gdrive
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - "RCLONE_CMD=sync"
+        - "TZ=America/Managua"
+        - "SYNC_SRC=/gdrive"
+        - "SYNC_DEST=gdrive:"
+        - "CRON=20 23 * * *"
+        - "FORCE_SYNC=1"
+        - "SYNC_OPTS=-v"
+    project-zomboid:
+        image: cyrale/project-zomboid
+        container_name: cn_pz_server
+        restart: always
+        environment:
+            SERVER_NAME: "pz-server-dk"
+            SERVER_PUBLIC_NAME : "pz-server-dk-pb"
+            SERVER_PUBLIC_DESC : "Un Server de un Par de Mancos"
+            ADMIN_PASSWORD: "dk_1425"
+        ports:
+            - "8766:8766/udp"
+            - "8767:8767/udp"
+            - "16261:16261/udp"
+            - "16262:16262/udp"
+            - "16262-16272:16262-16272"
+            - "27015:27015"
+        volumes:
+            - ./server-data:/server-data
+        deploy:
+          resources:
+            limits:
+              memory: 4GB
+              cpus: '1.50'
+            reservations:
+              memory: 2GB
