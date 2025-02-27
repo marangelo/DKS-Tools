@@ -23,3 +23,22 @@ services:
       - /path/to/root:/srv
       - /path/to/filebrowser.db:/database/filebrowser.db
       - /path/to/settings.json:/config/settings.json
+  homer:
+    image: b4bz/homer:latest
+    container_name: cn_homer
+    ports:
+      - "3000:8080"
+    volumes:
+      - ~/Devs/homer:/www/assets
+    restart: always
+
+
+  app-synapse:
+    image: matrixdotorg/synapse
+    container_name: cn_slack
+    restart: always
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./synapse-data:/data
+

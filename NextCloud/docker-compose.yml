@@ -1,0 +1,63 @@
+services:  
+  nextcloud:
+    container_name: cn_nextcloud
+    image: nextcloud:30.0.5
+    restart: always
+    ports:
+        - 4400:80
+        - 4403:443
+    volumes:
+        - ./nextcloud/nextcloud:/var/www/html
+        - ./nextcloud/apps:/var/www/html/custom_apps
+        - ./nextcloud/config:/var/www/html/config
+        - ./nextcloud/data:/var/www/html/data
+        - ./nextcloud/theme:/var/www/html/themes/temas
+        - ./nextcloud/php/memory-limit.ini:/usr/local/etc/php/conf.d/memory-limit.ini
+        - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=America/Managua
+        #- NEXTCLOUD_TRUSTED_DOMAINS='localhost'
+        - NEXTCLOUD_TRUSTED_DOMAINS=cloud.gumacorp.com
+        - OVERWRITECLIURL=https://cloud.gumacorp.com
+        - OVERWRITEPROTOCOL=https
+        - OVERWRITEHOST=cloud.gumacorp.com
+        - MYSQL_HOST=mariadb
+        - MYSQL_DATABASE=nexcloud
+        - MYSQL_USER=Dios
+        - MYSQL_PASSWORD=a7m1425.
+    networks:
+        net_guma:
+    deploy:
+      resources:
+        limits:
+          memory: 4GB
+          cpus: '1.50'
+        reservations:
+          memory: 2GB
+  mariadb:
+    container_name: cn_mariadb
+    image: mariadb:10.4.12
+    restart: always    
+    ports:
+        - 4407:3306
+    volumes:
+      - ./mariadb:/var/lib/mysql
+      - ./mariadb/mysqlconf:/etc/mysql/conf.d
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=America/Managua
+        - MYSQL_ROOT_PASSWORD=<CAMBIA_LA_PASSWORD>
+        - MYSQL_USER=Dios
+        - MYSQL_PASSWORD=a7m1425.
+        - MYSQL_DATABASE=nexcloud
+    networks:
+      net_guma:
+
+  networks:
+    net_guma:
+      name: net_guma
+      driver: bridge

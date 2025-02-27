@@ -79,6 +79,26 @@ services:
       - TZ=America/Managua
       - GZIP_LEVEL=9
     restart: always
+
+  rclone-gdrive:
+    image: pfidr/rclone
+    container_name: cn_cron-rclone-gdrive
+    restart: unless-stopped
+    volumes:
+      - ./conf:/config
+      - /share/DockerVolumes/BackUp:/gdrive
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - "RCLONE_CMD=sync"
+      - "TZ=America/Managua"
+      - "SYNC_SRC=/gdrive"
+      - "SYNC_DEST=gdrive:"
+      - "CRON=20 23 * * *"
+      - "FORCE_SYNC=1"
+      - "SYNC_OPTS=-v"
+      - "CHECK_URL=https://hc-ping.com/2eea09b3-4cb3-46d2-ac1b-ffbcb538fa0a"
+
   
   web-app-gnet:
     container_name: cn_app_gnet

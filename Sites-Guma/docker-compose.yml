@@ -1,0 +1,110 @@
+services:
+  srv-papiel_us:
+    #image: gumadesarrollo/php:7.4-apache-sqlsrv-prod
+    image: wordpress:5.4.0-php7.4-apache
+    container_name: cn_papiel_us
+    restart: always
+    ports:
+      - "81:80"
+    volumes:
+      - ./site-guma/public/papielus:/var/www/html
+    deploy:
+      resources:
+        limits:
+          memory: 500MB
+        reservations:
+          memory: 300MB
+
+  srv-farmaonco:
+    image: wordpress:5.6.2-php7.4-apache
+    container_name: cn_farmaonco
+    restart: always
+    ports:
+      - "82:80"
+    volumes:
+      - /home/guma/Devs/site-guma/public/farmaonco:/var/www/html
+    deploy:
+      resources:
+        limits:
+          memory: 500MB
+        reservations:
+          memory: 300MB
+
+  srv-innovaindustrias:
+    image: drupal:7.58-apache
+    container_name: cn_innovaindustrias
+    restart: always
+    ports:
+      - "85:80"
+    volumes:
+      - ./site-guma/public/innovaindustrias:/var/www/html
+    deploy:
+      resources:
+        limits:
+          memory: 500MB
+        reservations:
+          memory: 300MB
+
+  srv-unimarksa:
+    image: drupal:7.58-apache
+    container_name: cn_unimarksa
+    restart: always
+    ports:
+      - "84:80"
+    volumes:
+      - ./site-guma/public/unimarksa:/var/www/html
+    deploy:
+      resources:
+        limits:
+          memory: 500MB
+        reservations:
+          memory: 300MB
+
+  srv-fincaPandora:
+    image: drupal:7.58-apache
+    container_name: cn_finca_pandora
+    restart: always
+    ports:
+      - "87:80"
+    volumes:
+      - ./site-guma/public/finca_pandora_site:/var/www/html
+    deploy:
+      resources:
+        limits:
+          memory: 500MB
+        reservations:
+          memory: 300MB
+
+  srv-fincaPedidos:
+    image: drupal:7.58-apache
+    container_name: cn_finca_pedidos
+    restart: always
+    ports:
+      - "8086:80"
+    volumes:
+      - ./site-guma/public/finca_pandora_pedidos:/var/www/html
+    deploy:
+      resources:
+        limits:
+          memory: 500MB
+        reservations:
+          memory: 300MB
+
+    
+  srv-disteva:
+    image: wordpress:5.6.2-php7.4-apache
+    container_name: cn_disteva
+    restart: always
+    ports:
+      - "86:80"
+    volumes:
+      - ./site-guma/public/disteva:/var/www/html
+    deploy:
+      resources:
+        limits:
+          memory: 500MB
+        reservations:
+          memory: 300MB
+
+  
+
