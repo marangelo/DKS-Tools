@@ -1,0 +1,25 @@
+#   mkdir -p ~/endscom/filebrowser && cd ~/endscom/filebrowser && touch filebrowser.db .filebrowser.json & nano .filebrowser.json
+
+# {
+#   "port": 80,
+#   "baseURL": "",
+#   "address": "",
+#   "log": "stdout",
+#   "database": "/database.db",
+#   "root": "/srv"
+# }
+
+
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    container_name: cn_filebrowser
+    ports:
+      - "8080:80"
+    environment:
+      - PUID=${UID}
+      - PGID=${GID}
+    volumes:
+      - /path/to/root:/srv
+      - /path/to/filebrowser.db:/database/filebrowser.db
+      - /path/to/settings.json:/config/settings.json
