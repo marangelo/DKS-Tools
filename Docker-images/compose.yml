@@ -1,0 +1,45 @@
+services:
+  guama_server_apache:
+    container_name: cn_guama_server_apache
+    image: gumadesarrollo/php:7.4-apache-buster-sqlsrv
+    ports:
+      - "80:80"
+    volumes:
+      - ./www:/var/www/html
+  app_nginx:
+    container_name: cn_app-sac
+    image: kooldev/php:7.4-nginx-sqlsrv-prod
+    restart: always
+    volumes:
+      - "./www/SAC:/app/SAC"
+      - "./conf/default.tmpl:/kool/default.tmpl"
+    ports:
+      - "81:80"
+    environment:
+      - APP_NAME=SAC
+      - PHP_FPM_LISTEN=/run/php-fpm.sock
+      - NGINX_LISTEN=80
+      - NGINX_ROOT=/app/SAC/public
+      - NGINX_INDEX=index.php
+      - NGINX_CLIENT_MAX_BODY_SIZE=25M
+      - NGINX_PHP_FPM=unix:/run/php-fpm.sock
+      - NGINX_FASTCGI_READ_TIMEOUT=60s
+      - NGINX_FASTCGI_BUFFERS=8 8k
+      - NGINX_FASTCGI_BUFFER_SIZE=16k
+
+  mysql_server:
+    image: mysql:5.7
+    container_name: cn_mysql_server
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: ${PZW_ROOT}
+      MYSQL_PORT: ${myPORT}
+      MYSQL_USER: ${MYSQL_USER_MST}
+      MYSQL_PASSWORD: ${MYSQL_PASS_MST}
+      MYSQL_LOWER_CASE_TABLE_NAMES: 0
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mmysql/logs:/var/log/mysql
